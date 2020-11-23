@@ -12,6 +12,7 @@ def simulate_game(initial_board: np.array, sequence: list):
         if game_state != 0:
             return game_state
         board = execute_step(board=board, preferences=preferences, player_symbol=1 if current_player else 2)
+        current_player = not current_player
     return 0
 
 
