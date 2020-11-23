@@ -10,7 +10,7 @@ def simulate_game(initial_board: np.array, sequence: list):
     :param initial_board: The game state from which the simulation starts from.
     The notation must be: 0=empty, 1=current_player, 2: opponent
     :param sequence: The sequence of moves starting with player 1 (the current player)
-    and alternateing between the two players.
+    and alternating between the two players.
     :return: -1: draw,
               0: the game is still running
               1: the current player (player 1) won
