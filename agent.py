@@ -2,7 +2,19 @@ import numpy as np
 
 
 class Agent(object):
+    """
+    The parent class for agents.
+    """
     def step(self, game_state: np.array):
+        """
+        The step function of the agent.
+        :param game_state: The current state of the game, where:
+                           0: empty field
+                           1: field occupied by the current player
+                           2: field occupied by the opponent
+        :return: The list of all possible moves in descending order by desirability.
+        (so the first move is the most desirable)
+        """
         raise NotImplementedError
 
     def game_ended(self, has_won: bool):
