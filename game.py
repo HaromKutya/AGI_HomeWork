@@ -5,7 +5,7 @@ from utils import has_game_ended, execute_step, flip_players
 
 
 def simulate_game(initial_board: np.array, sequence: list):
-    current_player = False
+    current_player = True
     board = initial_board
     for preferences in sequence:
         game_state = has_game_ended(board=board)
