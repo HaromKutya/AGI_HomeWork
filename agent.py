@@ -1,10 +1,16 @@
 import numpy as np
 
+from game import Game
+
 
 class Agent(object):
     """
     The parent class for agents.
     """
+    def __init__(self, game: Game):
+        super(Agent, self).__init__()
+        self.game = game
+
     def step(self, game_state: np.array):
         """
         The step function of the agent.
@@ -21,8 +27,10 @@ class Agent(object):
         raise NotImplementedError
 
 
-
 class HumanAgent(Agent):
+    def __init__(self, game: Game):
+        super(HumanAgent, self).__init__(game)
+
     def step(self, game_state: np.array):
         for row in game_state:
             print("".join([str(element) for element in row]))
