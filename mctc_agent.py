@@ -10,6 +10,9 @@ class AIAgent(Agent):
         super(AIAgent, self).__init__(game)
         self.helper_agent = RandomAgent(game)
 
+    def game_started(self, initial_state: np.array):
+        pass
+
     def step(self, game_state: np.array):
         return self.helper_agent.step(game_state)
 

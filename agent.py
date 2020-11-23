@@ -11,6 +11,14 @@ class Agent(object):
         super(Agent, self).__init__()
         self.game = game
 
+    def game_started(self, initial_state: np.array):
+        """
+        Notify the agent if the game has started.
+        :param initial_state: The initial board of the game.
+        :return: None
+        """
+        raise NotImplementedError
+
     def step(self, game_state: np.array):
         """
         The step function of the agent.
@@ -24,12 +32,20 @@ class Agent(object):
         raise NotImplementedError
 
     def game_ended(self, has_won: bool):
+        """
+        Notify the agent if the game has ended.
+        :param has_won: True if the agent has won the game. False otherwise.
+        :return: None
+        """
         raise NotImplementedError
 
 
 class HumanAgent(Agent):
     def __init__(self, game: Game):
         super(HumanAgent, self).__init__(game)
+
+    def game_started(self, initial_state: np.array):
+        pass
 
     def step(self, game_state: np.array):
         for row in game_state:

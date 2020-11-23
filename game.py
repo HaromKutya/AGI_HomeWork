@@ -83,6 +83,9 @@ class Game(object):
         self.reset_board()
         self.history = []
 
+        player_1.game_started(self.board)
+        player_2.game_started(self.board)
+
         current_player = True
 
         while not self.check_game_ended(player_1, player_2):
