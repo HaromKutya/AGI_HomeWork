@@ -1,10 +1,11 @@
 from game import Game
-from agent import RandomAgent, HumanAgent
+from agent import HumanAgent
+from mctc_agent import AIAgent
 
 
 if __name__ == "__main__":
     human_agent = HumanAgent()
-    random_agent = RandomAgent()
+    random_agent = AIAgent()
 
     human_random_game = Game(human_agent, random_agent)
 

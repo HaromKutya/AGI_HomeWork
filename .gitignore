@@ -1,2 +1,7 @@
 .idea/*
 __pycache__/*
+*.exe
+*.cfg
+*.ps1
+*.bat
+agi_env2/Scripts/activate
