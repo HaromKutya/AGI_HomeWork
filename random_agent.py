@@ -11,8 +11,9 @@ class RandomAgent(Agent):
     def game_started(self, initial_state: np.array):
         pass
 
-    def step(self, game_state: np.array):
-        return list(np.random.permutation(game_state.shape[1]))
+    def step(self, game_state: np.array, last_step: int):
+        result =  np.random.randint(low=0, high=game_state.shape[1])
+        return result
 
     def game_ended(self, has_won: bool):
         pass

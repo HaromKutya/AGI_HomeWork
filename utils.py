@@ -36,17 +36,24 @@ def has_game_ended(board: np.array, player_count: int = 2, win_sequence_length: 
     return 0
 
 
-def execute_step(board: np.array, preferences: list, player_symbol: int):
+def get_possible_steps(board: np.array):
+    return np.where(board[0, :] == 0)[0]
+
+
+def execute_step(board: np.array, step: int):
+    assert (board[0, step] == 0)
     board_local = board.copy()
-    col_highest_indices = (board != 0).argmax(axis=0)
-    for col in range(board_local.shape[1]):
-        if np.all(board_local[:, col] == 0):
-            col_highest_indices[col] = board_local.shape[1] - 1
-    for pref in preferences:
-        if col_highest_indices[pref] > 0:
-            board_local[col_highest_indices[pref] - 1, pref] = player_symbol
-            return board_local
+    highest_index = np.where(board[:, step] == 0)[0][-1]
+    player = 1 if np.sum(board == 1) == np.sum(board == 2) else 2
+    board_local[highest_index, step] = player
     return board_local
+
+
+def execute_multiple_steps(initial_board: np.array, steps: list):
+    board = initial_board.copy()
+    for step in steps:
+        board = execute_step(board, step)
+    return board
 
 
 def flip_players(board: np.array):
@@ -56,3 +63,9 @@ def flip_players(board: np.array):
     board_local[player1_loc] = 2
     board_local[player2_loc] = 1
     return board_local
+
+
+if __name__ == "__main__":
+    board_local = np.zeros(shape=(6, 7))
+    board_local[:, 3] = 1
+    get_possible_steps(board_local)

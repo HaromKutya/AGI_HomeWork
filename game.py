@@ -3,26 +3,24 @@ import numpy as np
 from utils import has_game_ended, execute_step, flip_players
 
 
-def simulate_game(initial_board: np.array, sequence: list):
+def simulate_game(initial_board: np.array, steps: list):
     """
     Simulates a game from the given initial board and step sequence.
     :param initial_board: The game state from which the simulation starts from.
     The notation must be: 0=empty, 1=current_player, 2: opponent
-    :param sequence: The sequence of moves starting with player 1 (the current player)
+    :param steps: The sequence of steps starting with player 1 (the current player)
     and alternating between the two players.
     :return: -1: draw,
               0: the game is still running
               1: the current player (player 1) won
               2: the opponent (player 2) won
     """
-    current_player = True
     board = initial_board
-    for preferences in sequence:
+    for step in steps:
         game_state = has_game_ended(board=board)
         if game_state != 0:
             return game_state
-        board = execute_step(board=board, preferences=preferences, player_symbol=1 if current_player else 2)
-        current_player = not current_player
+        board = execute_step(board=board, step=step)
     return 0
 
 
@@ -36,7 +34,6 @@ class Game(object):
         """
         self._board_shape = board_shape
         self.board = np.zeros(shape=self._board_shape, dtype=np.int8)
-        self.history = []
 
     def check_game_ended(self, player_1, player_2):
         """
@@ -66,13 +63,6 @@ class Game(object):
         """
         self.board = np.zeros(shape=self._board_shape, dtype=np.int8)
 
-    def get_history(self):
-        """
-        Returns the list of game states after every taken move, starting with the first move.
-        :return: The list of game states after every taken move, starting with the first move.
-        """
-        return self.history
-
     def play_a_game(self, player_1, player_2):
         """
         Runs a game with two players, player_1 makes the first move.
@@ -81,18 +71,18 @@ class Game(object):
         :return: None
         """
         self.reset_board()
-        self.history = []
 
         player_1.game_started(self.board)
         player_2.game_started(self.board)
 
         current_player = True
 
+        step = -1
+
         while not self.check_game_ended(player_1, player_2):
             if current_player:
-                preferences = player_1.step(game_state=self.board)
+                step = player_1.step(game_state=self.board, last_step=step)
             else:
-                preferences = player_2.step(game_state=flip_players(self.board))
-            self.board = execute_step(board=self.board, preferences=preferences, player_symbol=1 if current_player else 2)
-            self.history.append(self.board.copy())
+                step = player_2.step(game_state=flip_players(self.board), last_step=step)
+            self.board = execute_step(board=self.board, step=step)
             current_player = not current_player
