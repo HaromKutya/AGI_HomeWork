@@ -61,7 +61,7 @@ class HumanAgent(Agent):
             if col_highest_indices[selected] > 0:
                 break
             print("The selected column is full. Select another!")
-        return [selected]
+        return selected
 
     def game_ended(self, has_won: bool):
         if has_won:
