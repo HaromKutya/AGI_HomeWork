@@ -32,7 +32,7 @@ class Agent(object):
         """
         raise NotImplementedError
 
-    def game_ended(self, has_won: bool):
+    def game_ended(self, has_won: bool, last_game_state: np.array, last_step: int):
         """
         Notify the agent if the game has ended.
         :param has_won: True if the agent has won the game. False otherwise.
@@ -63,7 +63,7 @@ class HumanAgent(Agent):
             print("The selected column is full. Select another!")
         return selected
 
-    def game_ended(self, has_won: bool):
+    def game_ended(self, has_won: bool, last_game_state: np.array, last_step: int):
         if has_won:
             print("Congrats! You Won!")
         else:

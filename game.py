@@ -35,7 +35,7 @@ class Game(object):
         self._board_shape = board_shape
         self.board = np.zeros(shape=self._board_shape, dtype=np.int8)
 
-    def check_game_ended(self, player_1, player_2):
+    def check_game_ended(self, player_1, player_2, last_step: int):
         """
         Check if the game has ended and notifies the players accordingly.
         :return: True if the game is over, False otherwise.
@@ -45,14 +45,14 @@ class Game(object):
             return False
 
         if result == 1:
-            player_1.game_ended(has_won=True)
-            player_2.game_ended(has_won=False)
+            player_1.game_ended(has_won=True, last_state=self.board, last_step=last_step)
+            player_2.game_ended(has_won=False, last_state=self.board, last_step=last_step)
         elif result == 2:
-            player_1.game_ended(has_won=False)
-            player_2.game_ended(has_won=True)
+            player_1.game_ended(has_won=False, last_state=self.board, last_step=last_step)
+            player_2.game_ended(has_won=True, last_state=self.board, last_step=last_step)
         elif result == -1:
-            player_1.game_ended(has_won=False)
-            player_2.game_ended(has_won=False)
+            player_1.game_ended(has_won=False, last_state=self.board, last_step=last_step)
+            player_2.game_ended(has_won=False, last_state=self.board, last_step=last_step)
 
         return True
 
@@ -79,7 +79,7 @@ class Game(object):
 
         step = -1
 
-        while not self.check_game_ended(player_1, player_2):
+        while not self.check_game_ended(player_1, player_2, last_step=step):
             if current_player:
                 step = player_1.step(game_state=self.board, last_step=step)
             else:

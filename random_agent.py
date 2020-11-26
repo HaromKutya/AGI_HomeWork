@@ -19,5 +19,5 @@ class RandomAgent(Agent):
         [result] = np.random.choice(opts, 1, replace=False)
         return result
 
-    def game_ended(self, has_won: bool):
+    def game_ended(self, has_won: bool, last_game_state: np.array, last_step: int):
         pass
