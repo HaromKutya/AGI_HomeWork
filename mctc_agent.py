@@ -54,7 +54,7 @@ class AIAgent(Agent):
         self.initial_state_key = None
 
     def game_started(self, initial_state: np.array):
-        print('game started')
+        # print('game started')
         init_state_key = StateInfNode.get_key(initial_state)
         if self.state_search_tree == {}:
             self.state_search_tree[init_state_key] = StateInfNode(initial_state)
@@ -79,22 +79,52 @@ class AIAgent(Agent):
     def game_ended(self, has_won: bool, last_game_state: np.array, last_step: int):
         if not has_won and last_step in self.state_search_tree[self.last_known_state_key].valid_steps():
             self._update_tree_with_last_step(last_game_state, last_step)
-
-        print(self.step_hist)
+        # print()
+        print('has_won:', has_won)
+        # print(self.step_hist)
         self.back_propagate(has_won)
-        print('tree length:', len(self.state_search_tree.keys()))
-        for i, key in enumerate(self.state_search_tree):
-            # print('\t', self.state_search_tree[key].get_state())
-            print(f'\t{self.state_search_tree[key].won_from_here}/{self.state_search_tree[key].visited}')
-            if i > 10:
-                break
+        # print('tree length:', len(self.state_search_tree.keys()))
+        # for i, key in enumerate(self.state_search_tree):
+        #     # print('\t', self.state_search_tree[key].get_state())
+        #     print(f'\t{self.state_search_tree[key].won_from_here}/{self.state_search_tree[key].visited}')
+        #     if i > 10:
+        #         break
 
-        print()
+        # print()
         self.step_hist = []
         self.last_known_state_key = None
 
     def select(self, game_state: np.array, last_step: int):
-        return self.helper_agent.step(game_state, last_step)
+        curr_state_node = self.state_search_tree[self.last_known_state_key]
+        valid_steps = get_possible_steps(curr_state_node.state)
+        valid_step_probs = []
+
+        child_wins = np.zeros(len(valid_steps))
+        child_visits = np.zeros(len(valid_steps))
+        for i, step in enumerate(valid_steps):
+            child_state = curr_state_node.get_child_state_by_step(step)
+            child_state_key = StateInfNode.get_key(child_state)
+            child_state_node = self.state_search_tree[child_state_key]
+            child_wins[i] = child_state_node.won_from_here
+            child_visits[i] = child_state_node.visited
+
+        step_idx = self.step_idx_to_take_UCB(child_wins, child_visits)
+
+        return valid_steps[step_idx]
+
+    def step_idx_to_take_softmax(self, child_wins, child_visits, eps=.0001):
+        valid_step_probs = (child_wins+eps) / (child_visits+eps)
+        valid_step_probs = np.exp(valid_step_probs) / np.sum(np.exp(valid_step_probs))
+        step_idx = np.random.choice(len(child_wins), 1, replace=False, p=valid_step_probs)
+        return step_idx
+
+    def step_idx_to_take_UCB(self, child_wins, child_visits, exploration_rate=1):
+        child_wins, child_visits = child_wins+1, child_visits+1 # until simulation does not make child_visits surely > 0
+        exploitation_component = child_wins / child_visits
+        ln_sum_visits = np.log(np.sum(child_visits))
+        exploration_component = exploration_rate * np.sqrt(ln_sum_visits/child_visits)
+        return np.argmax(exploitation_component+exploration_component)
+
 
     def _update_tree_with_last_step(self, game_state: np.array, last_step: int):
         new_state = self.state_search_tree[self.last_known_state_key].get_child_state_by_step(last_step)
