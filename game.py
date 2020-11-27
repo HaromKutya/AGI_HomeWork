@@ -45,14 +45,14 @@ class Game(object):
             return False
 
         if result == 1:
-            player_1.game_ended(has_won=True, last_state=self.board, last_step=last_step)
-            player_2.game_ended(has_won=False, last_state=self.board, last_step=last_step)
+            player_1.game_ended(has_won=True, last_game_state=self.board, last_step=last_step)
+            player_2.game_ended(has_won=False, last_game_state=self.board, last_step=last_step)
         elif result == 2:
-            player_1.game_ended(has_won=False, last_state=self.board, last_step=last_step)
-            player_2.game_ended(has_won=True, last_state=self.board, last_step=last_step)
+            player_1.game_ended(has_won=False, last_game_state=self.board, last_step=last_step)
+            player_2.game_ended(has_won=True, last_game_state=self.board, last_step=last_step)
         elif result == -1:
-            player_1.game_ended(has_won=False, last_state=self.board, last_step=last_step)
-            player_2.game_ended(has_won=False, last_state=self.board, last_step=last_step)
+            player_1.game_ended(has_won=False, last_game_state=self.board, last_step=last_step)
+            player_2.game_ended(has_won=False, last_game_state=self.board, last_step=last_step)
 
         return True
 
