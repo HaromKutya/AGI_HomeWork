@@ -37,6 +37,11 @@ class StateInfNode():
         assert step in get_possible_steps(self.state)
         return execute_step(self.state, step)
 
+    def visit_step(self, has_won):
+        self.visited += 1
+        if has_won:
+            self.won_from_here += 1
+
 
 class AIAgent(Agent):
     def __init__(self, game: Game, helper_agent: Agent = RandomAgent):
@@ -46,6 +51,7 @@ class AIAgent(Agent):
         self.step_hist = []
         self.last_known_state_key = None
         self.state_search_tree = {}
+        self.initial_state_key = None
 
     def game_started(self, initial_state: np.array):
         print('game started')
@@ -53,6 +59,7 @@ class AIAgent(Agent):
         if self.state_search_tree == {}:
             self.state_search_tree[init_state_key] = StateInfNode(initial_state)
         self.last_known_state_key = init_state_key
+        self.initial_state_key = init_state_key
 
     def step(self, game_state: np.array, last_step: int):
         if last_step >= 0:
@@ -73,10 +80,14 @@ class AIAgent(Agent):
         if not has_won and last_step in self.state_search_tree[self.last_known_state_key].valid_steps():
             self._update_tree_with_last_step(last_game_state, last_step)
 
-        print('tree length:', len(self.state_search_tree.keys()))
-        # for key in self.state_search_tree:
-        #     print('\t', self.state_search_tree[key].get_state())
         print(self.step_hist)
+        self.back_propagate(has_won)
+        print('tree length:', len(self.state_search_tree.keys()))
+        for i, key in enumerate(self.state_search_tree):
+            # print('\t', self.state_search_tree[key].get_state())
+            print(f'\t{self.state_search_tree[key].won_from_here}/{self.state_search_tree[key].visited}')
+            if i > 10:
+                break
 
         print()
         self.step_hist = []
@@ -103,4 +114,21 @@ class AIAgent(Agent):
             child_step_key = StateInfNode.get_key(child_state)
             if child_step_key not in self.state_search_tree.keys():
                 self.state_search_tree[child_step_key] = StateInfNode(child_state)
+
+    def back_propagate(self, has_won: bool):
+        self.back_propagate_step_history(self.step_hist, has_won)
+
+    def back_propagate_step_history(self, step_hist: list, has_won: bool):
+        state_key = self.initial_state_key
+        state_inf_node = self.state_search_tree[state_key]
+        state_inf_node.visit_step(has_won)
+        for step in step_hist:
+            assert step in state_inf_node.valid_steps()
+            child_state = state_inf_node.get_child_state_by_step(step)
+            state_key = StateInfNode.get_key(child_state)
+            state_inf_node = self.state_search_tree[state_key]
+            state_inf_node.visit_step(has_won)
+
+
+
 

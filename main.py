@@ -10,7 +10,7 @@ if __name__ == "__main__":
     human_agent = AIAgent(human_random_game)
     random_agent = AIAgent(human_random_game)
 
-    for i in range(5000):
+    for i in range(1000):
         print(i)
         if i % 2 == 0:
             human_random_game.play_a_game(human_agent, random_agent)
