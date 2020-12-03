@@ -24,6 +24,7 @@ def has_game_ended(board: np.array, last_step: int, win_sequence_length: int = 4
     x, y = highest_occupied_index, last_step
     player = board[x, y]
 
+    # vertical
     # down
     if (x + win_sequence_length) <= board.shape[0]:
         won = True
@@ -36,65 +37,58 @@ def has_game_ended(board: np.array, last_step: int, win_sequence_length: int = 4
 
     # (checking the upward direction is unnecessary)
 
+    # horizontal
+    counter = 1
     # right
-    if (y + win_sequence_length) <= board.shape[1]:
-        won = True
-        for yi in range(y + 1, y + win_sequence_length):
-            if board[x, yi] != player:
-                won = False
-                break
-        if won:
-            return player
-
+    for yi in range(y + 1, y + win_sequence_length if (y + win_sequence_length) <= board.shape[1] else board.shape[1]):
+        if board[x, yi] != player:
+            break
+        counter += 1
     # left
-    if (y - win_sequence_length) >= -1:
-        won = True
-        for yi in range(y - 1, y - win_sequence_length, -1):
-            if board[x, yi] != player:
-                won = False
-                break
-        if won:
-            return player
+    for yi in range(y - 1, y - win_sequence_length if (y - win_sequence_length) >= -1 else -1, -1):
+        if board[x, yi] != player:
+            break
+        counter += 1
+    if counter >= win_sequence_length:
+        return player
 
-    # down, right (diagonal)
-    if (x + win_sequence_length) <= board.shape[0] and (y + win_sequence_length) <= board.shape[1]:
-        won = True
-        for xi, yi in zip(range(x + 1, x + win_sequence_length), range(y + 1, y + win_sequence_length)):
-            if board[xi, yi] != player:
-                won = False
-                break
-        if won:
-            return player
+    # downward diagonal
+    counter = 1
+    # down-right
+    for xi, yi in zip(
+            range(x + 1, x + win_sequence_length if (x + win_sequence_length) <= board.shape[0] else board.shape[0]),
+            range(y + 1, y + win_sequence_length if (y + win_sequence_length) <= board.shape[1] else board.shape[1])):
+        if board[xi, yi] != player:
+            break
+        counter += 1
+    # up-left
+    for xi, yi in zip(
+            range(x - 1, x - win_sequence_length if (x - win_sequence_length) >= -1 else -1, -1),
+            range(y - 1, y - win_sequence_length if (y - win_sequence_length) >= -1 else -1, -1)):
+        if board[xi, yi] != player:
+            break
+        counter += 1
+    if counter >= win_sequence_length:
+        return player
 
-    # down, left (diagonal)
-    if (x + win_sequence_length) <= board.shape[0] and (y - win_sequence_length) >= -1:
-        won = True
-        for xi, yi in zip(range(x + 1, x + win_sequence_length), range(y - 1, y - win_sequence_length, -1)):
-            if board[xi, yi] != player:
-                won = False
-                break
-        if won:
-            return player
-
-    # up, right (diagonal)
-    if (x - win_sequence_length) >= -1 and (y + win_sequence_length) <= board.shape[1]:
-        won = True
-        for xi, yi in zip(range(x - 1, x - win_sequence_length, -1), range(y + 1, y + win_sequence_length)):
-            if board[xi, yi] != player:
-                won = False
-                break
-        if won:
-            return player
-
-    # up, left (diagonal)
-    if (x - win_sequence_length) >= -1 and (y - win_sequence_length) >= -1:
-        won = True
-        for xi, yi in zip(range(x - 1, x - win_sequence_length, -1), range(y - 1, y - win_sequence_length, -1)):
-            if board[xi, yi] != player:
-                won = False
-                break
-        if won:
-            return player
+    # upward diagonal
+    counter = 1
+    # down-left
+    for xi, yi in zip(
+            range(x - 1, x - win_sequence_length if (x - win_sequence_length) >= -1 else -1, -1),
+            range(y + 1, y + win_sequence_length if (y + win_sequence_length) <= board.shape[1] else board.shape[1])):
+        if board[xi, yi] != player:
+            break
+        counter += 1
+    # up-right
+    for xi, yi in zip(
+            range(x + 1, x + win_sequence_length if (x + win_sequence_length) <= board.shape[0] else board.shape[0]),
+            range(y - 1, y - win_sequence_length if (y - win_sequence_length) >= -1 else -1, -1)):
+        if board[xi, yi] != player:
+            break
+        counter += 1
+    if counter >= win_sequence_length:
+        return player
 
     # return -1 if the board is full and neither of the players won (tie)
     if np.all(board != 0):
