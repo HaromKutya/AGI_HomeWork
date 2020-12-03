@@ -3,7 +3,7 @@ import numpy as np
 from utils import has_game_ended, execute_step, flip_players
 
 
-def simulate_game(initial_board: np.array, steps: list):
+def simulate_game(initial_board: np.array, steps: list, last_step: int):
     """
     Simulates a game from the given initial board and step sequence.
     :param initial_board: The game state from which the simulation starts from.
@@ -17,10 +17,11 @@ def simulate_game(initial_board: np.array, steps: list):
     """
     board = initial_board
     for step in steps:
-        game_state = has_game_ended(board=board)
+        game_state = has_game_ended(board=board, last_step=last_step)
         if game_state != 0:
             return game_state
         board = execute_step(board=board, step=step)
+        last_step = step
     return 0
 
 
@@ -40,7 +41,7 @@ class Game(object):
         Check if the game has ended and notifies the players accordingly.
         :return: True if the game is over, False otherwise.
         """
-        result = has_game_ended(self.board)
+        result = has_game_ended(self.board, last_step)
         if result == 0:
             return False
 

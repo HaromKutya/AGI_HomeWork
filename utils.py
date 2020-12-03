@@ -11,25 +11,89 @@ def get_all_submatrices_of_shape(mat: np.array, shape: tuple):
     return result
 
 
-def has_game_ended(board: np.array, player_count: int = 2, win_sequence_length: int = 4):
-    horizontal = get_all_submatrices_of_shape(board, shape=(1, win_sequence_length))
-    for submat in horizontal:
-        for i in range(1, player_count + 1):
-            if np.all(submat == i):
-                return i
+def has_game_ended(board: np.array, last_step: int, win_sequence_length: int = 4):
+    if last_step == -1:
+        return 0
 
-    vertical = get_all_submatrices_of_shape(board, shape=(win_sequence_length, 1))
-    for submat in vertical:
-        for i in range(1, player_count + 1):
-            if np.all(submat == i):
-                return i
+    highest_occupied_index = np.where(board[:, last_step] == 0)[0][-1] + 1
+    assert board[highest_occupied_index, last_step] != 0
 
-    square = get_all_submatrices_of_shape(board, shape=(win_sequence_length, win_sequence_length))
-    for submat in square:
-        for i in range(1, player_count + 1):
-            if np.all(submat.diagonal() == i) or np.all(submat[:, ::-1].diagonal() == i):
-                return i
+    x, y = highest_occupied_index, last_step
+    player = board[x, y]
 
+    # down
+    if (x + win_sequence_length) <= board.shape[0]:
+        won = True
+        for xi in range(x + 1, x + win_sequence_length):
+            if board[xi, y] != player:
+                won = False
+                break
+        if won:
+            return player
+
+    # (checking the upward direction is unnecessary)
+
+    # right
+    if (y + win_sequence_length) <= board.shape[1]:
+        won = True
+        for yi in range(y + 1, y + win_sequence_length):
+            if board[x, yi] != player:
+                won = False
+                break
+        if won:
+            return player
+
+    # left
+    if (y - win_sequence_length) >= -1:
+        won = True
+        for yi in range(y - 1, y - win_sequence_length, -1):
+            if board[x, yi] != player:
+                won = False
+                break
+        if won:
+            return player
+
+    # down, right (diagonal)
+    if (x + win_sequence_length) <= board.shape[0] and (y + win_sequence_length) <= board.shape[1]:
+        won = True
+        for xi, yi in zip(range(x + 1, x + win_sequence_length), range(y + 1, y + win_sequence_length)):
+            if board[xi, yi] != player:
+                won = False
+                break
+        if won:
+            return player
+
+    # down, left (diagonal)
+    if (x + win_sequence_length) <= board.shape[0] and (y - win_sequence_length) >= -1:
+        won = True
+        for xi, yi in zip(range(x + 1, x + win_sequence_length), range(y - 1, y - win_sequence_length, -1)):
+            if board[xi, yi] != player:
+                won = False
+                break
+        if won:
+            return player
+
+    # up, right (diagonal)
+    if (x - win_sequence_length) >= -1 and (y + win_sequence_length) <= board.shape[1]:
+        won = True
+        for xi, yi in zip(range(x - 1, x - win_sequence_length, -1), range(y + 1, y + win_sequence_length)):
+            if board[xi, yi] != player:
+                won = False
+                break
+        if won:
+            return player
+
+    # up, left (diagonal)
+    if (x - win_sequence_length) >= -1 and (y - win_sequence_length) >= -1:
+        won = True
+        for xi, yi in zip(range(x - 1, x - win_sequence_length, -1), range(y - 1, y - win_sequence_length, -1)):
+            if board[xi, yi] != player:
+                won = False
+                break
+        if won:
+            return player
+
+    # return -1 if the board is full and neither of the players won (tie)
     if np.all(board != 0):
         return -1
 
