@@ -1,4 +1,6 @@
 import numpy as np
+import json
+import os
 
 from agent import Agent
 from game import Game
@@ -18,7 +20,8 @@ class StateInfNode():
 
     @staticmethod
     def get_key(game_state: np.array):
-        return game_state.tobytes()
+        # return game_state.tobytes()
+        return str(game_state)
 
     def get_state(self):
         return self.state
@@ -44,9 +47,10 @@ class StateInfNode():
 
 
 class AIAgent(Agent):
-    def __init__(self, game: Game, helper_agent: Agent = RandomAgent):
+    def __init__(self, game: Game, helper_agent: Agent = RandomAgent, save_tree_after_game=False):
         super(AIAgent, self).__init__(game)
         self.helper_agent = helper_agent(game)
+        self.save_tree_after_game = save_tree_after_game
 
         self.step_hist = []
         self.last_known_state_key = None
@@ -54,8 +58,9 @@ class AIAgent(Agent):
         self.initial_state_key = None
 
     def game_started(self, initial_state: np.array):
-        # print('game started')
         init_state_key = StateInfNode.get_key(initial_state)
+        if self.state_search_tree == {}:
+            self.load_search_tree()
         if self.state_search_tree == {}:
             self.state_search_tree[init_state_key] = StateInfNode(initial_state)
         self.last_known_state_key = init_state_key
@@ -84,6 +89,9 @@ class AIAgent(Agent):
         print('init state visited:', self.state_search_tree[self.initial_state_key].visited)
         # print(self.step_hist)
         self.back_propagate(has_won)
+
+        if self.save_tree_after_game:
+            self.save_search_tree()
         # print('tree length:', len(self.state_search_tree.keys()))
         # for i, key in enumerate(self.state_search_tree):
         #     # print('\t', self.state_search_tree[key].get_state())
@@ -127,20 +135,18 @@ class AIAgent(Agent):
         curr_state_node = self.state_search_tree[self.last_known_state_key]
         board_state = curr_state_node.get_child_state_by_step(first_step)
 
-        winner = has_game_ended(board=board_state)
+        winner = has_game_ended(board=board_state, last_step=first_step)
         step_to_take = first_step
         while winner == 0:
             step_to_take = self.helper_agent.step(board_state, step_to_take)
             board_state = execute_step(board_state, step_to_take)
-            winner = has_game_ended(board=board_state)
+            winner = has_game_ended(board=board_state, last_step=step_to_take)
 
         alt_history = self.step_hist + [first_step]
         if winner == 1:
             self.back_propagate_step_history(alt_history, has_won=True)
         else:
             self.back_propagate_step_history(alt_history, has_won=False)
-
-
 
     def step_idx_to_take_softmax(self, child_wins, child_visits, eps=.0001):
         valid_step_probs = (child_wins+eps) / (child_visits+eps)
@@ -189,6 +195,24 @@ class AIAgent(Agent):
             state_inf_node = self.state_search_tree[state_key]
             state_inf_node.visit_step(has_won)
 
+    def save_search_tree(self):
+        tree_list = [
+            [node.state.tolist(), node.won_from_here, node.visited]
+            for key, node in self.state_search_tree.items()
+        ]
+        with open('search_tree.json', 'w') as f:
+            json.dump(tree_list, f)
 
+    def load_search_tree(self):
+        save_dict = {}
+        if os.path.isfile('search_tree.json'):
+            with open('search_tree.json', 'r') as f:
+                tree_list = json.load(f)
+            for [state, won_from_here, visited] in tree_list:
+                state = np.asarray(state)
+                new_node = StateInfNode(state)
+                new_node.won_from_here = won_from_here
+                new_node.visited = visited
+                save_dict[StateInfNode.get_key(state)] = new_node
 
-
+        self.state_search_tree = save_dict
