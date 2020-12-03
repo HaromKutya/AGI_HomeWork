@@ -15,7 +15,10 @@ def has_game_ended(board: np.array, last_step: int, win_sequence_length: int = 4
     if last_step == -1:
         return 0
 
-    highest_occupied_index = np.where(board[:, last_step] == 0)[0][-1] + 1
+    if np.all(board[:, last_step] != 0):
+        highest_occupied_index = 0
+    else:
+        highest_occupied_index = np.where(board[:, last_step] == 0)[0][-1] + 1
     assert board[highest_occupied_index, last_step] != 0
 
     x, y = highest_occupied_index, last_step
