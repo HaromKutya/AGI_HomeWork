@@ -19,9 +19,21 @@ class StateInfNode():
         self.won_from_here = 0
 
     @staticmethod
-    def get_key(game_state: np.array):
-        # return game_state.tobytes()
-        return str(game_state)
+    def encode_state(game_state: np.array):
+        compList = []
+        for row in game_state:
+            compList.append(''.join(map(str, row.flatten())))
+        return ';'.join(compList)
+
+    @staticmethod
+    def decode_state(game_state_label: str):
+        game_state_list = []
+        for row in game_state_label.split(';'):
+            game_state_list.append(list(row))
+        state = np.asarray(game_state_list, dtype=int)
+        return state
+
+
 
     def get_state(self):
         return self.state
@@ -58,7 +70,7 @@ class AIAgent(Agent):
         self.initial_state_key = None
 
     def game_started(self, initial_state: np.array):
-        init_state_key = StateInfNode.get_key(initial_state)
+        init_state_key = StateInfNode.encode_state(initial_state)
         if self.state_search_tree == {}:
             self.load_search_tree()
         if self.state_search_tree == {}:
@@ -74,7 +86,7 @@ class AIAgent(Agent):
         step_to_take = self.select(game_state, last_step)
 
         new_state = self.state_search_tree[self.last_known_state_key].get_child_state_by_step(step_to_take)
-        self.last_known_state_key = StateInfNode.get_key(new_state)
+        self.last_known_state_key = StateInfNode.encode_state(new_state)
         self.step_hist.append(step_to_take)
 
         # print(step_to_take)
@@ -87,6 +99,7 @@ class AIAgent(Agent):
         # print()
         print('has_won:', has_won)
         print('init state visited:', self.state_search_tree[self.initial_state_key].visited)
+        print('number of nodes in search tree:', len(self.state_search_tree.keys()))
         # print(self.step_hist)
         self.back_propagate(has_won)
 
@@ -120,7 +133,7 @@ class AIAgent(Agent):
     def child_won_visited_simulate_if_needed(self, step: int):
         curr_state_node = self.state_search_tree[self.last_known_state_key]
         child_state = curr_state_node.get_child_state_by_step(step)
-        child_state_key = StateInfNode.get_key(child_state)
+        child_state_key = StateInfNode.encode_state(child_state)
         child_state_node = self.state_search_tree[child_state_key]
 
         visits = child_state_node.visited
@@ -166,7 +179,7 @@ class AIAgent(Agent):
         curr_state_inf_node = self.state_search_tree[self.last_known_state_key]
         for valid_step in curr_state_inf_node.valid_steps():
             child_state = curr_state_inf_node.get_child_state_by_step(valid_step)
-            child_step_key = StateInfNode.get_key(child_state)
+            child_step_key = StateInfNode.encode_state(child_state)
             if child_step_key not in self.state_search_tree.keys():
                 self.state_search_tree[child_step_key] = StateInfNode(child_state)
 
@@ -174,7 +187,7 @@ class AIAgent(Agent):
         new_state = self.state_search_tree[self.last_known_state_key].get_child_state_by_step(last_step)
         # assert (new_state == game_state).all()
 
-        new_state_key = StateInfNode.get_key(new_state)
+        new_state_key = StateInfNode.encode_state(new_state)
         if new_state_key not in self.state_search_tree.keys():
             self.state_search_tree[new_state_key] = StateInfNode(new_state)
         self.last_known_state_key = new_state_key
@@ -191,13 +204,13 @@ class AIAgent(Agent):
         for step in step_hist:
             assert step in state_inf_node.valid_steps()
             child_state = state_inf_node.get_child_state_by_step(step)
-            state_key = StateInfNode.get_key(child_state)
+            state_key = StateInfNode.encode_state(child_state)
             state_inf_node = self.state_search_tree[state_key]
             state_inf_node.visit_step(has_won)
 
     def save_search_tree(self):
         tree_list = [
-            [node.state.tolist(), node.won_from_here, node.visited]
+            [StateInfNode.encode_state(node.state), node.won_from_here, node.visited]
             for key, node in self.state_search_tree.items()
         ]
         with open('search_tree.json', 'w') as f:
@@ -208,11 +221,11 @@ class AIAgent(Agent):
         if os.path.isfile('search_tree.json'):
             with open('search_tree.json', 'r') as f:
                 tree_list = json.load(f)
-            for [state, won_from_here, visited] in tree_list:
-                state = np.asarray(state)
+            for [state_key, won_from_here, visited] in tree_list:
+                state = StateInfNode.decode_state(state_key)
                 new_node = StateInfNode(state)
                 new_node.won_from_here = won_from_here
                 new_node.visited = visited
-                save_dict[StateInfNode.get_key(state)] = new_node
+                save_dict[state_key] = new_node
 
         self.state_search_tree = save_dict
