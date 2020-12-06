@@ -1,7 +1,7 @@
 from game import Game
 from agent import HumanAgent
 from mctc_agent import AIAgent
-from random_agent import RandomAgent
+from random_agent import RandomAgent, CentroidRandomAgent, GreedyRandomAgent, MinimalistRandomAgent
 
 import numpy as np
 
@@ -10,7 +10,7 @@ if __name__ == "__main__":
     mctc_random_game = Game()
 
     ai_1 = AIAgent(mctc_random_game)
-    random_agent = RandomAgent(mctc_random_game)
+    random_agent = MinimalistRandomAgent(mctc_random_game)
 
     for i in range(2000):
         print(i)
