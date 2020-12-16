@@ -6,3 +6,7 @@ __pycache__/*
 *.bat
 agi_env2/Scripts/activate
 search_tree.json
+main.py
+*.csv
+nohup.out
+*.json
