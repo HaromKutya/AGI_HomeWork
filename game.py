@@ -87,3 +87,5 @@ class Game(object):
                 step = player_2.step(game_state=flip_players(self.board), last_step=step)
             self.board = execute_step(board=self.board, step=step)
             current_player = not current_player
+
+        return has_game_ended(self.board, last_step=step)

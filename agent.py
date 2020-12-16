@@ -50,7 +50,7 @@ class HumanAgent(Agent):
 
     def step(self, game_state: np.array, last_step: int):
         for row in game_state:
-            print("".join([str(element) for element in row]))
+            print(" ".join([str(element) for element in row]))
 
         col_highest_indices = (game_state != 0).argmax(axis=0)
         for col in range(game_state.shape[1]):
