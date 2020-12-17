@@ -31,3 +31,5 @@ for i in range(1, len(opponent_dict) + 1):
     print("\nVictories against " + opponent_dict[i] + ": %.4f" % (float(victories) / float(games.shape[0])))
     print("Ties against " + opponent_dict[i] + ": %.4f" % (float(ties) / float(games.shape[0])))
     print("Victories against " + opponent_dict[i] + ": %.4f" % (float(losses) / float(games.shape[0])))
+
+print("\nStarting player winning rate: %.4f" % (float(data[data["winner"] == 1].shape[0]) / float(data.shape[0])))
