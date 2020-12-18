@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+from matplotlib import pyplot as plt
 
 
 opponent_dict = {
@@ -33,3 +35,56 @@ for i in range(1, len(opponent_dict) + 1):
     print("Victories against " + opponent_dict[i] + ": %.4f" % (float(losses) / float(games.shape[0])))
 
 print("\nStarting player winning rate: %.4f" % (float(data[data["winner"] == 1].shape[0]) / float(data.shape[0])))
+
+
+x = data_against_random.index.values
+
+y = []
+for i in range(len(x)):
+    lower_bound = i - 2000
+    if lower_bound < 0:
+        lower_bound = 0
+    current_data = data_against_random[lower_bound:i]
+    victories = current_data[current_data["starting_player"] == current_data["winner"]].shape[0]
+    if current_data.shape[0] > 0:
+        win_rate = float(victories) / float(current_data.shape[0])
+    else:
+        win_rate = 0.
+    y.append(win_rate)
+
+y = np.array(y)
+
+plt.plot(x, y)
+plt.ylim((0, 1))
+plt.title("Against all random agents (window size: 2000)")
+plt.xlabel("All games played")
+plt.ylabel("Win ratio for the last 2000 games")
+plt.show()
+
+
+for i in range(1, len(opponent_dict) + 1):
+    games = data_against_random[data_against_random["opponent"] == i]
+
+    x = games.index.values
+
+    y = []
+    for j in range(len(x)):
+        lower_bound = j - 200
+        if lower_bound < 0:
+            lower_bound = 0
+        current_data = games[lower_bound:j]
+        victories = current_data[current_data["starting_player"] == current_data["winner"]].shape[0]
+        if current_data.shape[0] > 0:
+            win_rate = float(victories) / float(current_data.shape[0])
+        else:
+            win_rate = 0.
+        y.append(win_rate)
+
+    y = np.array(y)
+
+    plt.plot(x, y)
+    plt.ylim((0, 1))
+    plt.title("Against " + opponent_dict[i] + " (window size: 200)")
+    plt.xlabel("All games played")
+    plt.ylabel("Win ratio for the last 200 games")
+    plt.show()
