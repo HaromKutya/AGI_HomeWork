@@ -54,11 +54,13 @@ for i in range(len(x)):
 
 y = np.array(y)
 
+plt.figure(dpi=200)
 plt.plot(x, y)
 plt.ylim((0, 1))
 plt.title("Against all random agents (window size: 2000)")
 plt.xlabel("All games played")
 plt.ylabel("Win ratio for the last 2000 games")
+plt.savefig("plots/all_random_20000.png")
 plt.show()
 
 
@@ -82,9 +84,11 @@ for i in range(1, len(opponent_dict) + 1):
 
     y = np.array(y)
 
+    plt.figure(dpi=200)
     plt.plot(x, y)
     plt.ylim((0, 1))
     plt.title("Against " + opponent_dict[i] + " (window size: 200)")
     plt.xlabel("All games played")
     plt.ylabel("Win ratio for the last 200 games")
+    plt.savefig("plots/" + opponent_dict[i] + "_20000.png")
     plt.show()

@@ -59,14 +59,18 @@ class StateInfNode():
 
 
 class AIAgent(Agent):
-    def __init__(self, game: Game, helper_agent: Agent = RandomAgent, save_tree_after_game=False):
+    def __init__(self, game: Game, helper_agent: Agent = RandomAgent, save_tree_after_game=False,
+                 state_search_tree=None):
         super(AIAgent, self).__init__(game)
         self.helper_agent = helper_agent(game)
         self.save_tree_after_game = save_tree_after_game
 
         self.step_hist = []
         self.last_known_state_key = None
-        self.state_search_tree = {}
+        if state_search_tree is None:
+            self.state_search_tree = {}
+        else:
+            self.state_search_tree = state_search_tree
         self.initial_state_key = None
 
     def game_started(self, initial_state: np.array):

@@ -2,17 +2,19 @@ from game import Game
 from agent import HumanAgent
 from mctc_agent import AIAgent
 from random_agent import RandomAgent, CentroidRandomAgent, GreedyRandomAgent, MinimalistRandomAgent
+import copy
 
+import sys
 import time
 import numpy as np
 
 
 if __name__ == "__main__":
-    burn_in = 0
+    burn_in = 100
 
     mctc_random_game = Game()
 
-    ai_1 = AIAgent(mctc_random_game)
+    ai_1 = AIAgent(mctc_random_game, helper_agent=GreedyRandomAgent)
 
     random_agents = [RandomAgent(mctc_random_game),
                      CentroidRandomAgent(mctc_random_game),
@@ -22,13 +24,18 @@ if __name__ == "__main__":
     log_file = open("training_log_" + str(int(time.time())) + ".csv", 'w')
     log_file.write("iteration,burn_in,opponent,starting_player,winner,ai_node_count,root_visited,step_count\n")
 
-    for i in range(20000):
+    last_saved_search_tree = None
+
+    start_time = time.time()
+    for i in range(1000):
         print('Iteration ' + str(i))
-        if i > burn_in and np.random.random() < 0.7:
+        if i > burn_in and np.random.random() < 0.5:
             opponent_index = 0
-            opponent = AIAgent(mctc_random_game)
+            opponent = AIAgent(mctc_random_game, helper_agent=GreedyRandomAgent,
+                               state_search_tree=last_saved_search_tree)
         else:
-            opponent_index = np.random.choice(len(random_agents), 1)[0]
+            # opponent_index = np.random.choice(len(random_agents), 1)[0]
+            opponent_index = 2
             opponent = random_agents[opponent_index]
             opponent_index += 1
         # opponent_index = -1
@@ -54,6 +61,11 @@ if __name__ == "__main__":
 
         if (i + 1) % 20 == 0:
             ai_1.save_search_tree()
+            last_saved_search_tree = copy.deepcopy(ai_1.state_search_tree)
 
+        log_file.flush()
+        sys.stdout.flush()
+
+    print("Completed in %.2f seconds" % (time.time() - start_time))
     log_file.close()
     # mctc_random_game.play_a_game(HumanAgent(mctc_random_game), ai_1)
